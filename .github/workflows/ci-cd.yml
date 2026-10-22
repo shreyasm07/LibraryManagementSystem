@@ -1,6 +1,27 @@
-- name: Copy Application Files
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Create Build Directory
+        run: mkdir -p dist
+
+      - name: Copy Application Files
         run: |
-          mkdir -p dist
           cp LibraryManagementSystem-main-main/index.html dist/
           cp LibraryManagementSystem-main-main/style.css dist/
           cp LibraryManagementSystem-main-main/script.js dist/
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-artifact
+          path: dist/
