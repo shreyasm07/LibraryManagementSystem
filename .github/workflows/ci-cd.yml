@@ -1,4 +1,4 @@
-name: Library Management CI/CD
+name: CI/CD Pipeline
 
 on:
   push:
