@@ -1,0 +1,6 @@
+- name: Copy Application Files
+        run: |
+          mkdir -p dist
+          cp LibraryManagementSystem-main-main/index.html dist/
+          cp LibraryManagementSystem-main-main/style.css dist/
+          cp LibraryManagementSystem-main-main/script.js dist/
