@@ -1,27 +1,72 @@
-name: CI/CD Pipeline
+name: Library Management CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  build:
+  build-and-test:
+    name: Build and Test
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Source Code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create Build Directory
-        run: mkdir -p dist
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-      - name: Copy Application Files
+      - name: Verify application files
         run: |
+          test -f LibraryManagementSystem-main-main/index.html
+          test -f LibraryManagementSystem-main-main/style.css
+          test -f LibraryManagementSystem-main-main/script.js
+          test -f LibraryManagementSystem-main-main/README.md
+          echo "All required application files exist."
+
+      - name: Validate JavaScript syntax
+        run: node --check LibraryManagementSystem-main-main/script.js
+
+      - name: Build website
+        run: |
+          mkdir -p dist
           cp LibraryManagementSystem-main-main/index.html dist/
           cp LibraryManagementSystem-main-main/style.css dist/
           cp LibraryManagementSystem-main-main/script.js dist/
+          cp LibraryManagementSystem-main-main/README.md dist/
+          echo "Website build completed."
 
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload website artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: site-artifact
-          path: dist/
+          path: dist
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Deploy website
+        id: deployment
+        uses: actions/deploy-pages@v4
